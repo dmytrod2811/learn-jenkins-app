@@ -31,7 +31,7 @@ pipeline {
                 sh '''
                     echo "Test Stage"
                     test -f $BUILD_FILE_NAME
-                    npm run test
+                    npm test
                 '''
             }
         }
