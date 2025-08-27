@@ -7,6 +7,7 @@ pipeline {
 
     stages {
         stage('Build') {
+            // This is a comment about using Docker agent
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -26,7 +27,7 @@ pipeline {
                 '''
             }
         }
-        stage('test') {
+        stage('Test') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -38,6 +39,22 @@ pipeline {
                     echo "Test Stage"
                     test -f $BUILD_FILE_NAME
                     npm test
+                '''
+            }
+        }
+
+        stage('E2E Tests') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.55.0-noble'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    npm install -g serve
+                    serve -s build
+                    npx playwright test
                 '''
             }
         }
