@@ -4,6 +4,7 @@ pipeline {
     environment {
         BUILD_FILE_NAME = 'build/index.html'
         NETLIFY_SITE_ID = '09ae5c00-859c-4469-9026-c3d09edf0874'
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
     }
 
     stages {
@@ -85,9 +86,11 @@ pipeline {
             steps {
                 sh '''
                     
-                    npm install netlify-cli@20.1.1
+                    npm install netlify-cli #@20.1.1
                     node_modules/.bin/netlify --version
                     echo "Deploying to Netlify... Project_ID $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+
                 '''
             }
         }
