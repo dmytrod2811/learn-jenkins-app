@@ -75,7 +75,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Deploy') {
             // This is a comment about using Docker agent
             agent {
                 docker {
