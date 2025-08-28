@@ -86,12 +86,37 @@ pipeline {
             steps {
                 sh '''
                     
-                    npm install netlify-cli@20.1.1
+                    npm install netlify-cli@20.1.1 node-jq
                     node_modules/.bin/netlify --version
                     echo "Deploying to Netlify... Project_ID $NETLIFY_SITE_ID STAGING"
                     node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --message "Staging deploy"
+                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
+                    #node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                 '''
+                script {
+                    env.deploy_url = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
+                }
+            }
+        }
+        stage(' E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.55.0-jammy'
+                    reuseNode true
+                }
+            }
+            environment {
+                CI_ENVIRONMENT_URL = ${env.deploy_url}
+            }
+            steps {
+                sh '''
+            npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                }
             }
         }
         stage('Aproval') {
@@ -127,9 +152,9 @@ pipeline {
                     reuseNode true
                 }
             }
-                environment {
-                    CI_ENVIRONMENT_URL = 'https://inspiring-medovik-94c869.netlify.app'
-                }
+            environment {
+                CI_ENVIRONMENT_URL = 'https://inspiring-medovik-94c869.netlify.app'
+            }
             steps {
                 sh '''
             npx playwright test --reporter=html
