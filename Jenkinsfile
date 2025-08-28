@@ -5,6 +5,7 @@ pipeline {
         BUILD_FILE_NAME = 'build/index.html'
         NETLIFY_SITE_ID = '09ae5c00-859c-4469-9026-c3d09edf0874'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        REACT_APP_VERSION = "1.0.$BUILD_ID"
     }
 
     stages {
@@ -119,13 +120,13 @@ pipeline {
                 }
             }
         }
-        stage('Aproval') {
-            steps {
-                timeout(time: 1, unit: 'MINUTES') {
-                    input message: 'Approve Deployment?', ok: 'Deploy'
-                }
-            }
-        }
+        // stage('Aproval') {
+        //     steps {
+        //         timeout(time: 1, unit: 'MINUTES') {
+        //             input message: 'Approve Deployment?', ok: 'Deploy'
+        //         }
+        //     }
+        // }
         // stage('Deploy production') {
         //     agent {
         //         docker {
