@@ -70,7 +70,7 @@ pipeline {
                     }
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_local Report', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
@@ -93,6 +93,27 @@ pipeline {
                     node_modules/.bin/netlify deploy --dir=build --prod
                     #just to check, comment out if not needed
                 '''
+            }
+        }
+        stage('Prod E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.55.0-jammy'
+                    reuseNode true
+                }
+            }
+                environment {
+                    CI_ENVIRONMENT_URL = 'https://inspiring-medovik-94c869.netlify.app'
+                }
+            steps {
+                sh '''
+            npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                }
             }
         }
     }
