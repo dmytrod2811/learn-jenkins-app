@@ -41,7 +41,8 @@ pipeline {
                     echo "Test Stage"
                     test -f $BUILD_FILE_NAME
                     npm test
-                '''
+                    ls -la
+                        '''
                     }
                     post {
                         always {
@@ -49,31 +50,31 @@ pipeline {
                         }
                     }
 
-                    stage('E2E Tests') {
-                        agent {
-                            docker {
-                                image 'mcr.microsoft.com/playwright:v1.55.0-jammy'
-                                reuseNode true
-                            }
+                stage('E2E Tests') {
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/playwright:v1.55.0-jammy'
+                            reuseNode true
                         }
-                        steps {
-                            sh '''
-                            npm install serve &
-                            sleep 10
-                            node_modules/.bin/serve -s build &
-                            sleep 10
-                            npx playwright test --reporter=html
-                        '''
-                        }
-                        post {
-                            always {
-                                publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                            }
+                    }
+                    steps {
+                        sh '''
+                        npm install serve &
+                        sleep 10
+                        node_modules/.bin/serve -s build &
+                        sleep 10
+                        npx playwright test --reporter=html
+                    '''
+                    }
+                    post {
+                        always {
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
             }
         }
+    }
 
         stage('Deploy') {
             // This is a comment about using Docker agent
