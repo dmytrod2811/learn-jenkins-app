@@ -27,28 +27,28 @@ pipeline {
                 '''
             }
         }
-        stage('Run tests'){
+        stage('Run tests') {
             parallel {
                 stage('Test') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
+                    agent {
+                        docker {
+                            image 'node:18-alpine'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh '''
                     echo "Test Stage"
                     test -f $BUILD_FILE_NAME
                     npm test
-                '''
-            }
-            post {
-                always {
-                    junit 'jest-results/junit.xml' 
+                        '''
+                    }
+                    post {
+                        always {
+                            junit 'jest-results/junit.xml'
+                        }
+                    }
                 }
-            }
-
 
                 stage('E2E Tests') {
                     agent {
@@ -59,11 +59,11 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            npm install serve &
-                            sleep 10
-                            node_modules/.bin/serve -s build &
-                            sleep 10
-                            npx playwright test --reporter=html
+                    npm install serve &
+                    sleep 10
+                    node_modules/.bin/serve -s build &
+                    sleep 10
+                    npx playwright test --reporter=html
                         '''
                     }
                     post {
@@ -72,10 +72,7 @@ pipeline {
                         }
                     }
                 }
-        }
-
             }
         }
-        
     }
 }
