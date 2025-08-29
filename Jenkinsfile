@@ -11,7 +11,6 @@ pipeline {
         AWS_CLUSTER = 'learn-jenkins-nocturnal-horse-zo5n4u'
         AWS_SERVICE = 'LearJenkinsApp-Prod-service-ye2462kt'
         AWS_TASK_DEFINITION = 'LearJenkinsApp-TaskDefinition-Prod'
-        REACT_APP_VERSION = "1.0.$BUILD_ID"
         APP_NAME = 'my_jenkins_app'
         AWS_DOCKER_REGISTRY = '257394478566.dkr.ecr.us-east-1.amazonaws.com'
     }
