@@ -24,8 +24,12 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'jenkins_aws_cli_s3_admin', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        aws s3 sync build s3://$AWS_S3_BUCKET/ --delete
+                        #aws s3 sync build s3://$AWS_S3_BUCKET/ --delete
                         aws ecs register-task-definition --cli-input-json file://aws/task-definition.json
+                        aws ecs update-service \
+                        --cluster learn-jenkins-nocturnal-horse-zo5n4u \
+                        --service LearJenkinsApp-Prod-service-ye2462kt \
+                        --task-definition LearJenkinsApp-TaskDefinition-Prod:3
                     '''
                 }
             }
