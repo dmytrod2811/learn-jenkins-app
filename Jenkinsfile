@@ -100,7 +100,7 @@ pipeline {
                     #node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                 '''
                 script {
-                    env.deploy_url = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
+                    env.deploy_url = sh(script: "node-jq -r '.deploy_url' deploy-output.json", returnStdout: true).trim()
                 }
             }
         }
