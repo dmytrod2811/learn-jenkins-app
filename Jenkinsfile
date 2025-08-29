@@ -8,6 +8,9 @@ pipeline {
         REACT_APP_VERSION = "1.0.$BUILD_ID"
         AWS_S3_BUCKET = 'learn-jenkins-2025-08-29'
         AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_CLUSTER = 'learn-jenkins-nocturnal-horse-zo5n4u'
+        AWS_SERVICE = 'LearJenkinsApp-Prod-service-ye2462kt'
+        AWS_TASK_DEFINITION = 'LearJenkinsApp-TaskDefinition-Prod'
     }
 
     stages {
@@ -27,17 +30,18 @@ pipeline {
                         yum install -y jq
                         #aws s3 sync build s3://$AWS_S3_BUCKET/ --delete
 
-                        LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition.json \
+                        LATEST_TD_REVISION=$(aws ecs register-task-definition \
+                        --cli-input-json file://aws/task-definition.json \
                         | jq '.taskDefinition.revision')
                         
                         aws ecs update-service \
-                        --cluster learn-jenkins-nocturnal-horse-zo5n4u \
-                        --service LearJenkinsApp-Prod-service-ye2462kt \
-                        --task-definition LearJenkinsApp-TaskDefinition-Prod:$LATEST_TD_REVISION
+                        --cluster $AWS_CLUSTER \
+                        --service $AWS_SERVICE \
+                        --task-definition $AWS_TASK_DEFINITION:$LATEST_TD_REVISION
 
                         aws ecs wait services-stable \
-                        --cluster learn-jenkins-nocturnal-horse-zo5n4u \
-                        --services LearJenkinsApp-Prod-service-ye2462kt
+                        --cluster $AWS_CLUSTER \
+                        --services $AWS_SERVICE
                     '''
                 }
             }
