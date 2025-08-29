@@ -22,7 +22,6 @@ pipeline {
                     aws --version
                 '''
             }
-            }
         }
         stage('Build') {
             // This is a comment about using Docker agent
