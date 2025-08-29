@@ -10,24 +10,6 @@ pipeline {
     }
 
     stages {
-
-        stage('AWS') {
-            agent {
-                docker {
-                    image 'amazon/aws-cli'
-                    args "--entrypoint ''"
-                }
-            }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'jenkins_aws_cli_s3_admin', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                    sh '''
-                        aws --version
-                        echo "Listing S3 buckets" > index.html
-                        aws s3 cp build_s3.txt s3://$AWS_S3_BUCKET/index.html
-                    '''
-                }
-            }
-        }
         stage('Build') {
             // This is a comment about using Docker agent
             agent {
@@ -184,6 +166,24 @@ pipeline {
             post {
                 always {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_prod_E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
+        }
+
+        stage('AWS') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli'
+                    args "--entrypoint ''"
+                    reuseNode true
+                }
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'jenkins_aws_cli_s3_admin', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        aws s3 sync build s3://$AWS_S3_BUCKET/ --delete
+                    '''
                 }
             }
         }
