@@ -26,12 +26,18 @@ pipeline {
                         aws --version
                         yum install -y jq
                         #aws s3 sync build s3://$AWS_S3_BUCKET/ --delete
-                        LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition.json | jq '.taskDefinition.revision')
+
+                        LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition.json \
+                        | jq '.taskDefinition.revision')
                         
                         aws ecs update-service \
                         --cluster learn-jenkins-nocturnal-horse-zo5n4u \
                         --service LearJenkinsApp-Prod-service-ye2462kt \
                         --task-definition LearJenkinsApp-TaskDefinition-Prod:$LATEST_TD_REVISION
+
+                        aws ecs wait services-stable \
+                        --cluster learn-jenkins-nocturnal-horse-zo5n4u \
+                        --services LearJenkinsApp-Prod-service-ye2462kt
                     '''
                 }
             }
