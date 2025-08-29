@@ -46,10 +46,9 @@ pipeline {
             }
             steps {
                 sh '''
-                    amazon-linux-extras install docker
                     yum install -y awscli docker
                     aws --version
-                    
+
                     docker build -t my_jenkins_app .
                 '''
             }
