@@ -9,13 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Docker info') {
-            steps {
-                sh '''
-                    docker build -t my-playwright .
-                '''
-            }
-        }
         stage('Build') {
             // This is a comment about using Docker agent
             agent {
