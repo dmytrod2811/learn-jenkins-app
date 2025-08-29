@@ -11,6 +11,9 @@ pipeline {
         AWS_CLUSTER = 'learn-jenkins-nocturnal-horse-zo5n4u'
         AWS_SERVICE = 'LearJenkinsApp-Prod-service-ye2462kt'
         AWS_TASK_DEFINITION = 'LearJenkinsApp-TaskDefinition-Prod'
+        REACT_APP_VERSION = "1.0.$BUILD_ID"
+        APP_NAME = 'my_jenkins_app'
+        AWS_DOCKER_REGISTRY = '257394478566.dkr.ecr.us-east-1.amazonaws.com'
     }
 
     stages {
@@ -45,18 +48,24 @@ pipeline {
                 }
             }
             steps {
-                sh '''
-                    docker build -t my_jenkins_app .
-                '''
+                withCredentials([usernamePassword(credentialsId: 'jenkins_aws_cli_s3_admin', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                    docker build -t $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION .
+                    aws ecr get-login-password --region $AWS_DEFAULT_REGION \
+                    | docker login --username AWS --password-stdin $AWS_DOCKER_REGISTRY 
+                    docker push $AWS_DOCKER_REGISTRY/$APP_NAME:$REACT_APP_VERSION
+                    '''
+                }
+                
             }
         }   
 
 
-        stage('AWS') {
+        stage('Deploy to AWS') {
             agent {
                 docker {
                     image 'my-aws-cli'
-                    args "-u root --entrypoint ''"
+                    args "--entrypoint ''"
                     reuseNode true
                 }
             }
@@ -64,7 +73,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'jenkins_aws_cli_s3_admin', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         #aws s3 sync build s3://$AWS_S3_BUCKET/ --delete
-                        
+
                         LATEST_TD_REVISION=$(aws ecs register-task-definition \
                         --cli-input-json file://aws/task-definition.json \
                         | jq '.taskDefinition.revision')
