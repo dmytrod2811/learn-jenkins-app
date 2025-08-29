@@ -9,6 +9,13 @@ pipeline {
     }
 
     stages {
+        stage('Docker info') {
+            steps {
+                sh '''
+                    docker build -t my-playwright .
+                '''
+            }
+        }
         stage('Build') {
             // This is a comment about using Docker agent
             agent {
@@ -169,7 +176,7 @@ pipeline {
             }
             post {
                 always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_Prod_E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright_prod_E2E Report', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }
