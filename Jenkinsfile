@@ -21,7 +21,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'jenkins_aws_cli_s3_admin', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        aws s3 ls
+                        echo "Listing S3 buckets" > build_s3.txt
+                        aws s3 cp build_s3.txt s3://learn-jenkins-2025-08-29/build_s3.txt
                     '''
                 }
             }
