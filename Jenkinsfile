@@ -20,7 +20,7 @@ pipeline {
             // This is a comment about using Docker agent
             agent {
                 docker {
-                    image 'node:18-alpine'
+                    image 'my-playwright'
                     reuseNode true
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
                 stage('Test') {
                     agent {
                         docker {
-                            image 'node:18-alpine'
+                            image 'my-playwright'
                             reuseNode true
                         }
                     }
@@ -63,15 +63,13 @@ pipeline {
                 stage('E2E Tests') {
                     agent {
                         docker {
-                            image 'mcr.microsoft.com/playwright:v1.55.0-jammy'
+                            image 'my-playwright'
                             reuseNode true
                         }
                     }
                     steps {
                         sh '''
-                    npm install serve &
-                    sleep 10
-                    node_modules/.bin/serve -s build &
+                    serve -s build &
                     sleep 10
                     npx playwright test --reporter=html
                         '''
@@ -87,18 +85,18 @@ pipeline {
         stage('Deploy staging') {
             agent {
                 docker {
-                    image 'node:18-alpine'
+                    image 'my-playwright'
                     reuseNode true
                 }
             }
             steps {
                 sh '''
                     
-                    npm install netlify-cli@20.1.1 node-jq
-                    node_modules/.bin/netlify --version
+                    #npm install netlify-cli@20.1.1 node-jq
+                    #node_modules/.bin/netlify --version
                     echo "Deploying to Netlify... Project_ID $NETLIFY_SITE_ID STAGING"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
+                    netlify status
+                    netlify deploy --dir=build --json > deploy-output.json
                     #node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                 '''
                 script {
@@ -109,7 +107,7 @@ pipeline {
         stage(' E2E') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.55.0-jammy'
+                    image 'my-playwright'
                     reuseNode true
                 }
             }
@@ -156,7 +154,7 @@ pipeline {
         stage('Deploy production + E2E') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.55.0-jammy'
+                    image 'my-playwright'
                     reuseNode true
                 }
             }
@@ -165,11 +163,8 @@ pipeline {
             }
             steps {
                 sh '''
-                    npm install netlify-cli@20.1.1
-                    node_modules/.bin/netlify --version
                     echo "Deploying to Netlify... Project_ID $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
+                    netlify deploy --dir=build --prod
                     sleep 10
                     npx playwright test --reporter=html
                 '''
