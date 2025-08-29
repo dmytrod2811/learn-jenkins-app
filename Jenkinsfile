@@ -37,6 +37,13 @@ pipeline {
         }
 
         stage('Build Docker Image') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli'
+                    args "-u root --entrypoint ''"
+                    reuseNode true
+                }
+            }
             steps {
                 sh '''
                     docker build -t my_jenkins_app .
@@ -67,7 +74,7 @@ pipeline {
                         aws ecs update-service \
                         --cluster $AWS_CLUSTER \
                         --service $AWS_SERVICE \
-                        --task-definition $:$LATEST_TD_REVISION
+                        --task-definition $AWS_TASK_DEFINITION:$LATEST_TD_REVISION
 
                         aws ecs wait services-stable \
                         --cluster $AWS_CLUSTER \
