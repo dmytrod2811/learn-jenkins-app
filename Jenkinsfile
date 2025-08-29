@@ -14,6 +14,36 @@ pipeline {
     }
 
     stages {
+        stage('Build') {
+            // This is a comment about using Docker agent
+            agent {
+                docker {
+                    image 'my-playwright'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    ls -la
+                    node -v
+                    npm -v
+                    echo "Building inside a Docker container..."
+                    npm ci
+                    npm run build
+                    ls -la
+                    ls -la build
+                '''
+            }
+        }
+
+        stage(Build Docker Image) {
+            steps {
+                sh '''
+                    docker build -t my_jenkins_app .
+                '''
+            }
+        }   
+
 
         stage('AWS') {
             agent {
@@ -37,35 +67,13 @@ pipeline {
                         aws ecs update-service \
                         --cluster $AWS_CLUSTER \
                         --service $AWS_SERVICE \
-                        --task-definition $AWS_TASK_DEFINITION:$LATEST_TD_REVISION
+                        --task-definition $:$LATEST_TD_REVISION
 
                         aws ecs wait services-stable \
                         --cluster $AWS_CLUSTER \
                         --services $AWS_SERVICE
                     '''
                 }
-            }
-        }
-
-        stage('Build') {
-            // This is a comment about using Docker agent
-            agent {
-                docker {
-                    image 'my-playwright'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    ls -la
-                    node -v
-                    npm -v
-                    echo "Building inside a Docker container..."
-                    npm ci
-                    npm run build
-                    ls -la
-                    ls -la build
-                '''
             }
         }
         // stage('Run tests') {
